@@ -1,7 +1,56 @@
-# Tauri + React + Typescript
+<p align="center">
+  <img src="assets/logo.svg" alt="stickedd" width="140">
+</p>
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+<h1 align="center">stickedd</h1>
+<p align="center"><b>Tus notas, siempre a mano.</b><br>Notas adhesivas flotantes para el escritorio de Windows.</p>
 
-## Recommended IDE Setup
+## Instalar (1 comando)
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Abre **PowerShell** y pega:
+
+```powershell
+irm https://raw.githubusercontent.com/TU_USUARIO/stickedd/main/install.ps1 | iex
+```
+
+Descarga el instalador de la última versión, lo instala sin preguntas y abre la app. Stickedd queda en la bandeja del sistema (junto al reloj).
+
+> También puedes bajar el instalador `.exe` a mano desde [Releases](https://github.com/TU_USUARIO/stickedd/releases/latest).
+
+## Cómo se usa
+
+- **Clic izquierdo** en el icono de la bandeja: nueva nota.
+- **Clic derecho** en el icono: Nueva nota · Gestionar notas · Salir.
+- **Doble clic** en una nota: editarla. **Clic derecho** en una nota: editar, fijar, archivar o eliminar.
+- En modo edición: color (paleta o color propio), tamaño de letra, listas, listas con checkbox, imágenes con marco ajustable e imagen de fondo.
+- **Fijar** deja la nota siempre visible y bloquea su posición y tamaño.
+- Los botones de la barra superior de la nota se eligen y ordenan en *Gestionar notas → Personalizar*.
+
+Las notas se guardan en una base de datos SQLite local; nada sale de tu equipo.
+
+## Compilar desde el código
+
+Necesitas [Node.js](https://nodejs.org), [pnpm](https://pnpm.io), [Rust](https://rustup.rs) y las *Build Tools* de Visual Studio (C++).
+
+```powershell
+git clone https://github.com/TU_USUARIO/stickedd.git
+cd stickedd
+pnpm install
+pnpm tauri dev      # desarrollo
+pnpm tauri build    # genera el instalador en src-tauri/target/release/bundle/nsis
+```
+
+## Publicar una versión
+
+Sube la versión en `package.json`, `src-tauri/Cargo.toml` y `src-tauri/tauri.conf.json`, y crea la etiqueta:
+
+```powershell
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+GitHub Actions (`.github/workflows/release.yml`) compila el instalador y lo publica en Releases; desde ahí lo descarga el comando de instalación.
+
+---
+
+Hecho con Tauri 2 · React 19 · Tailwind 4 · SQLite.
