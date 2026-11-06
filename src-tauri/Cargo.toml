@@ -1,8 +1,8 @@
 [package]
 name = "stickedd"
 version = "0.2.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Notas adhesivas flotantes para el escritorio de Windows"
+authors = ["Edgar Lopez Calomarde"]
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1,6 +1,6 @@
 # Instala Stickedd descargando el instalador de la última release de GitHub.
-# Uso:  irm https://raw.githubusercontent.com/TU_USUARIO/stickedd/main/install.ps1 | iex
-$Repo = "TU_USUARIO/stickedd"   # shortcut: cambia esto si el repo se llama distinto
+# Uso:  irm https://raw.githubusercontent.com/edgarlopezcalomarde/stickedd/main/install.ps1 | iex
+$Repo = "edgarlopezcalomarde/stickedd"   # shortcut: cambia esto si el repo se llama distinto
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

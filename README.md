@@ -10,12 +10,12 @@
 Abre **PowerShell** y pega:
 
 ```powershell
-irm https://raw.githubusercontent.com/TU_USUARIO/stickedd/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/edgarlopezcalomarde/stickedd/main/install.ps1 | iex
 ```
 
 Descarga el instalador de la última versión, lo instala sin preguntas y abre la app. Stickedd queda en la bandeja del sistema (junto al reloj).
 
-> También puedes bajar el instalador `.exe` a mano desde [Releases](https://github.com/TU_USUARIO/stickedd/releases/latest).
+> También puedes bajar el instalador `.exe` a mano desde [Releases](https://github.com/edgarlopezcalomarde/stickedd/releases/latest).
 
 ## Cómo se usa
 
@@ -33,7 +33,7 @@ Las notas se guardan en una base de datos SQLite local; nada sale de tu equipo.
 Necesitas [Node.js](https://nodejs.org), [pnpm](https://pnpm.io), [Rust](https://rustup.rs) y las *Build Tools* de Visual Studio (C++).
 
 ```powershell
-git clone https://github.com/TU_USUARIO/stickedd.git
+git clone https://github.com/edgarlopezcalomarde/stickedd.git
 cd stickedd
 pnpm install
 pnpm tauri dev      # desarrollo

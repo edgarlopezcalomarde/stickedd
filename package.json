@@ -2,6 +2,13 @@
   "name": "stickedd",
   "private": true,
   "version": "0.2.0",
+  "description": "Notas adhesivas flotantes para el escritorio de Windows",
+  "author": "Edgar Lopez Calomarde <edgarlopezcalomarde@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edgarlopezcalomarde/stickedd.git"
+  },
+  "homepage": "https://github.com/edgarlopezcalomarde/stickedd",
   "type": "module",
   "scripts": {
     "dev": "vite",
