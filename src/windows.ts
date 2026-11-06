@@ -31,7 +31,7 @@ async function openTool(label: string, title: string, width: number, height: num
   new WebviewWindow(label, { url: `index.html#/${label}`, title, width, height, minWidth: 360, minHeight: 420, center: true, decorations: false, maximizable: false });
 }
 export const openManage = () => openTool("manage", "stickedd · Gestionar notas", 920, 600);
-export const openSettings = () => openTool("settings", "stickedd · Personalizar", 400, 740);
+export const openSettings = () => openTool("settings", "stickedd · Personalizar", 400, 800);
 
 // Paneles (color / tamaño de letra) como ventana propia junto a la nota, para que no queden recortados por ella.
 export async function closePanel(id: number) {

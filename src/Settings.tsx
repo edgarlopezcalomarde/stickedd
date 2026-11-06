@@ -3,6 +3,7 @@ import { applyDefaultsToAll, getDefaults, getToolbar, setDefault, setToolbar, TO
 import { CUSTOM_BG, PALETTE, isCustom, shade } from "./theme";
 import { ColorPicker } from "./ColorPicker";
 import { Icon, P } from "./icons";
+import { Updates } from "./Updates";
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { WindowControls } from "./WindowFrame";
 
@@ -62,6 +63,7 @@ export function Settings() {
             style={{ left: auto ? 22 : 2, background: auto ? "var(--panel)" : "var(--ink-soft)" }} />
         </button>
       </div>
+      <Updates />
       <div>
         <div className="mb-1 font-display font-semibold text-base">Barra superior de la nota</div>
         <p className="mb-2" style={{ color: "var(--ink-soft)" }}>Elige qué botones ver y en qué orden. Sin ninguno, la nota se ve sin barra. Siempre puedes usar clic derecho (menú) y doble clic (editar).</p>
