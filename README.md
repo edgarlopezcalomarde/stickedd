@@ -30,14 +30,14 @@ Las notas se guardan en una base de datos SQLite local; nada sale de tu equipo.
 
 ## Compilar desde el código
 
-Necesitas [Node.js](https://nodejs.org), [pnpm](https://pnpm.io), [Rust](https://rustup.rs) y las *Build Tools* de Visual Studio (C++).
+Necesitas [Bun](https://bun.sh), [Rust](https://rustup.rs) y las *Build Tools* de Visual Studio (C++).
 
 ```powershell
 git clone https://github.com/edgarlopezcalomarde/stickedd.git
 cd stickedd
-pnpm install
-pnpm tauri dev      # desarrollo
-pnpm tauri build    # genera el instalador en src-tauri/target/release/bundle/nsis
+bun install
+bun --bun run tauri dev      # desarrollo
+bun --bun run tauri build    # genera el instalador en src-tauri/target/release/bundle/nsis
 ```
 
 ---

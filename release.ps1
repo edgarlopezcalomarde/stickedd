@@ -1,4 +1,4 @@
-# Prepara una release: compila el instalador firmado y genera latest.json (lo que lee la app para actualizarse).
+﻿# Prepara una release: compila el instalador firmado y genera latest.json (lo que lee la app para actualizarse).
 # Uso:  .\release.ps1 "Qué cambia en esta versión"
 # Después sube a GitHub (Releases -> Draft a new release, etiqueta v<versión>) los 3 archivos que imprime al final.
 param([string]$Notes = "")
@@ -8,8 +8,11 @@ if (-not (Test-Path $key)) { throw "Falta la clave de firma: $key" }
 $env:TAURI_SIGNING_PRIVATE_KEY = Get-Content $key -Raw
 $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ""
 
-pnpm tauri build
-if ($LASTEXITCODE -ne 0) { throw "Falló la compilación" }
+$ErrorActionPreference = "Continue"   # bun escribe su eco en stderr; no es un error
+bun --bun run tauri build
+$code = $LASTEXITCODE
+$ErrorActionPreference = "Stop"
+if ($code -ne 0) { throw "Falló la compilación" }
 
 $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
 $dir = "src-tauri\target\release\bundle\nsis"

@@ -4,9 +4,9 @@
   "version": "0.3.0",
   "identifier": "com.stickedd.app",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "bun --bun run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "bun --bun run build",
     "frontendDist": "../dist"
   },
   "app": {
