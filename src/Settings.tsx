@@ -3,14 +3,16 @@ import { applyDefaultsToAll, getDefaults, getToolbar, setDefault, setToolbar, TO
 import { CUSTOM_BG, PALETTE, isCustom, shade } from "./theme";
 import { ColorPicker } from "./ColorPicker";
 import { Icon, P } from "./icons";
+import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { WindowControls } from "./WindowFrame";
 
 export function Settings() {
   const [d, setD] = useState<Defaults>();
   const [done, setDone] = useState(false);
   const [picker, setPicker] = useState(false);
+  const [auto, setAuto] = useState<boolean>();
   const [bar, setBar] = useState<ToolId[]>([]);
-  useEffect(() => { getDefaults().then(setD); getToolbar().then(setBar); }, []);
+  useEffect(() => { getDefaults().then(setD); getToolbar().then(setBar); isEnabled().then(setAuto).catch(() => setAuto(false)); }, []);
   if (!d) return null;
 
   const set = <K extends keyof Defaults>(k: K, v: Defaults[K]) => { setD({ ...d, [k]: v }); setDefault(k, v); setDone(false); };
@@ -47,6 +49,19 @@ export function Settings() {
         <input type="range" min={30} max={100} value={d.opacity} className="w-full" style={{ accentColor: "var(--ink)" }}
           onChange={(e) => set("opacity", Number(e.target.value))} />
       </label>
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <div className="font-display font-semibold text-base">Iniciar con Windows</div>
+          <p style={{ color: "var(--ink-soft)" }}>Stickedd se abre solo al encender el ordenador.</p>
+        </div>
+        <button role="switch" aria-checked={!!auto} aria-label="Iniciar con Windows" disabled={auto === undefined}
+          onClick={async () => { try { if (auto) await disable(); else await enable(); setAuto(!auto); } catch { /* sin permiso: se queda como estaba */ } }}
+          className="w-12 h-7 rounded-full border-0 cursor-pointer relative shrink-0 transition-colors"
+          style={{ background: auto ? "var(--ink)" : "var(--chip)" }}>
+          <span className="absolute top-0.5 size-6 rounded-full transition-all"
+            style={{ left: auto ? 22 : 2, background: auto ? "var(--panel)" : "var(--ink-soft)" }} />
+        </button>
+      </div>
       <div>
         <div className="mb-1 font-display font-semibold text-base">Barra superior de la nota</div>
         <p className="mb-2" style={{ color: "var(--ink-soft)" }}>Elige qué botones ver y en qué orden. Sin ninguno, la nota se ve sin barra. Siempre puedes usar clic derecho (menú) y doble clic (editar).</p>
