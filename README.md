@@ -40,17 +40,6 @@ pnpm tauri dev      # desarrollo
 pnpm tauri build    # genera el instalador en src-tauri/target/release/bundle/nsis
 ```
 
-## Publicar una versión
-
-Sube la versión en `package.json`, `src-tauri/Cargo.toml` y `src-tauri/tauri.conf.json`, y crea la etiqueta:
-
-```powershell
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-GitHub Actions (`.github/workflows/release.yml`) compila el instalador y lo publica en Releases; desde ahí lo descarga el comando de instalación.
-
 ---
 
 Hecho con Tauri 2 · React 19 · Tailwind 4 · SQLite.
