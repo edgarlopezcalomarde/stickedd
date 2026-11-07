@@ -1,6 +1,6 @@
 [package]
 name = "stickedd"
-version = "0.4.0"
+version = "0.4.1"
 description = "Notas adhesivas flotantes para el escritorio de Windows"
 authors = ["Edgar Lopez Calomarde"]
 edition = "2024"
@@ -25,6 +25,8 @@ tauri-plugin-sql = { version = "2.6.0", features = ["sqlite"] }
 tauri-plugin-single-instance = "2.5.5"
 tauri-plugin-autostart = "2.7.0"
 tauri-plugin-updater = "2.14.1"
+tauri-plugin-dialog = "2.8.4"
+tauri-plugin-fs = "2.7.1"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

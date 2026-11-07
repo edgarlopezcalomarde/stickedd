@@ -4,7 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { deleteNote, getNote, getToolbar, updateNote, type Note as NoteT, type ToolId } from "./db";
 import { ink, inkOn, shade } from "./theme";
 import { parseBlocks, type Block, type ImgBlock } from "./blocks";
-import { readImage } from "./image";
+import { pickImage, readImage } from "./image";
 import { Icon, P } from "./icons";
 import { closePanel, openPanel } from "./windows";
 
@@ -44,7 +44,6 @@ export function Note({ id }: { id: number }) {
   const refs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const focus = useRef<number | null>(null); // bloque enfocado
   const pending = useRef<number | null>(null); // bloque a enfocar tras renderizar
-  const fileInput = useRef<HTMLInputElement>(null);
   const press = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
@@ -297,11 +296,7 @@ export function Note({ id }: { id: number }) {
               <Btn size={36} label="Fondo de la nota" on={panel === "bg" || !!note.bg_image} onClick={() => togglePanel("bg")}><Icon d={P.fill} size={18} /></Btn>
               <Btn size={36} label="Lista con viñetas" on={focus.current != null && blocks[focus.current]?.t === "bullet"} onClick={() => convert("bullet")}><Icon d={P.bullet} size={18} /></Btn>
               <Btn size={36} label="Lista de tareas con checkbox" on={focus.current != null && blocks[focus.current]?.t === "check"} onClick={() => convert("check")}><Icon d={P.check} size={18} /></Btn>
-              <Btn size={36} label="Insertar imagen (o pega con Ctrl+V)" onClick={() => fileInput.current?.click()}><Icon d={P.image} size={18} /></Btn>
-              <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => {
-                const f = e.target.files?.[0]; e.target.value = "";
-                if (f) addImage(f);
-              }} />
+              <Btn size={36} label="Insertar imagen (o pega con Ctrl+V)" onClick={async () => { const f = await pickImage(); if (f) addImage(f); }}><Icon d={P.image} size={18} /></Btn>
             </div>
           </div>
         )}

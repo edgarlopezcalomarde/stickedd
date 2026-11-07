@@ -5,7 +5,7 @@ import { emit, listen } from "@tauri-apps/api/event";
 import { getNote, updateNote, type Note } from "./db";
 import { CUSTOM_BG, PALETTE, isCustom, shade } from "./theme";
 import { ColorPicker } from "./ColorPicker";
-import { readImage } from "./image";
+import { pickImage, readImage } from "./image";
 import { Icon, P } from "./icons";
 
 const win = getCurrentWebviewWindow();
@@ -25,7 +25,6 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
   const [picker, setPicker] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const picking = useRef(false); // el diálogo de archivos quita el foco al panel: no cerrarlo entonces
-  const fileInput = useRef<HTMLInputElement>(null);
   const setOpacity = useRef(debounce((o: number) => updateNote(id, { opacity: o }), 80)).current;
   const setColor = useRef(debounce((c: string) => updateNote(id, { color: c }), 80)).current;
 
@@ -94,7 +93,11 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
             )}
             <button className="h-10 rounded-full border-0 cursor-pointer font-display font-semibold text-[15px] flex items-center justify-center gap-2"
               style={{ background: "var(--ink)", color: "var(--panel)" }}
-              onClick={() => { picking.current = true; fileInput.current?.click(); }}>
+              onClick={async () => {
+                picking.current = true;
+                const f = await pickImage().catch(() => null); picking.current = false;
+                if (f) { const src = await readImage(f, 1600); setNote({ ...note, bg_image: src }); updateNote(id, { bg_image: src }); }
+              }}>
               <Icon d={P.image} size={16} />{note.bg_image ? "Cambiar imagen" : "Elegir imagen"}
             </button>
             {note.bg_image && (
@@ -104,11 +107,6 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
                 <Icon d={P.trash} size={16} />Quitar fondo
               </button>
             )}
-            <input ref={fileInput} type="file" accept="image/*" hidden
-              onChange={async (e) => {
-                const f = e.target.files?.[0]; e.target.value = ""; picking.current = false;
-                if (f) { const src = await readImage(f, 1600); setNote({ ...note, bg_image: src }); updateNote(id, { bg_image: src }); }
-              }} />
           </>
         ) : (
           <>
