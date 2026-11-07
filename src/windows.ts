@@ -9,7 +9,7 @@ export async function openNote(n: Note) {
   if (ex) return focus(ex);
   new WebviewWindow(`note-${n.id}`, {
     url: `index.html#/note/${n.id}`,
-    x: n.x, y: n.y, width: n.w, height: n.h, minWidth: 200, minHeight: 190, // cabe el menú contextual
+    x: n.x, y: n.y, width: n.w, height: n.h, minWidth: 140, minHeight: 100,
     decorations: false, transparent: true, shadow: false, skipTaskbar: true, resizable: !n.locked, alwaysOnTop: !!n.locked, maximizable: false, // sin esto, doble clic en la barra maximiza la nota
    
   });

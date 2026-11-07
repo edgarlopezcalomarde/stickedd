@@ -26,6 +26,7 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
   const box = useRef<HTMLDivElement>(null);
   const picking = useRef(false); // el diálogo de archivos quita el foco al panel: no cerrarlo entonces
   const fileInput = useRef<HTMLInputElement>(null);
+  const setOpacity = useRef(debounce((o: number) => updateNote(id, { opacity: o }), 80)).current;
   const setColor = useRef(debounce((c: string) => updateNote(id, { color: c }), 80)).current;
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
       }}>
         {kind === "color" ? (
           <>
-            <div className="font-display font-semibold text-base">Color de la nota</div>
+            <div className="font-display font-semibold text-base">Color y transparencia</div>
             <div className="flex flex-wrap items-center gap-2.5">
               {PALETTE.map((p) => (
                 <button key={p.name} aria-label={p.name} title={p.name} onClick={() => { setNote({ ...note, color: p.light }); updateNote(id, { color: p.light }); }}
@@ -76,6 +77,12 @@ export function Panel({ id, kind }: { id: number; kind: "color" | "size" | "bg" 
                 style={{ background: isCustom(note.color) ? note.color : CUSTOM_BG, boxShadow: isCustom(note.color) || picker ? ring : undefined }} />
             </div>
             {picker && <ColorPicker value={note.color} onChange={(c) => { setNote({ ...note, color: c }); setColor(c); }} />}
+            <label className="flex items-center gap-3 text-sm">
+              <span className="shrink-0">Opacidad</span>
+              <input type="range" min={30} max={100} value={note.opacity} className="flex-1 min-w-0" style={{ accentColor: "var(--ink)" }}
+                onChange={(e) => { const opacity = +e.target.value; setNote({ ...note, opacity }); setOpacity(opacity); }} />
+              <span className="w-10 text-right font-display font-semibold">{note.opacity}%</span>
+            </label>
           </>
         ) : kind === "bg" ? (
           <>

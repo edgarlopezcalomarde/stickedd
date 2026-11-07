@@ -120,6 +120,15 @@ export function Note({ id }: { id: number }) {
     return false;
   };
   const addImage = async (blob: Blob) => insertImage(focus.current ?? blocks.length - 1, await readImage(blob));
+  const pasteImage = (e: { clipboardData: DataTransfer | null; preventDefault: () => void }) => { // imagen copiada de la web: como archivo o como <img src> en el HTML
+    const d = e.clipboardData; if (!d) return;
+    const f = [...d.items].find((it) => it.type.startsWith("image/"))?.getAsFile();
+    const src = new DOMParser().parseFromString(d.getData("text/html"), "text/html").querySelector("img")?.src;
+    if (f) { e.preventDefault(); addImage(f); }
+    else if (src && !d.getData("text/plain").trim()) { // shortcut: depende del CORS de la web de origen, si falla no se inserta nada
+      e.preventDefault(); fetch(src).then((r) => r.blob()).then(addImage).catch(() => {});
+    }
+  };
   const startResize = (e: React.PointerEvent, i: number) => { // asa del marco: ancho (en %) y alto (en px) libres
     e.preventDefault(); e.stopPropagation();
     const handle = e.currentTarget as HTMLElement;
@@ -182,7 +191,12 @@ export function Note({ id }: { id: number }) {
   return (
     <div className="h-full p-[2px] pb-[5px]"
       onContextMenu={(e) => { e.preventDefault(); setMenu({ x: clamp(e.clientX, 6, innerWidth - MENU_W - 6), y: clamp(e.clientY, 6, innerHeight - MENU_H - 6) }); }}
-      onDoubleClick={(e) => { if (!editing && !(e.target as HTMLElement).closest("button")) setEditing(true); }}
+      onPaste={editing ? pasteImage : undefined}
+      onDoubleClick={(e) => { // en edición, doble clic fuera del texto (que selecciona palabras) termina la edición
+        const t = e.target as HTMLElement;
+        if (t.closest("button,textarea,input,[data-handle]")) return;
+        if (editing) toggleEdit(); else setEditing(true);
+      }}
       onMouseDown={(e) => {
         const t = e.target as HTMLElement;
         press.current = canGrab && e.button === 0 && !t.closest("button,input[type=checkbox],[data-tauri-drag-region]") ? { x: e.clientX, y: e.clientY } : null;
@@ -192,11 +206,15 @@ export function Note({ id }: { id: number }) {
         if (p && e.buttons === 1 && Math.hypot(e.clientX - p.x, e.clientY - p.y) > 4) { press.current = null; win.startDragging(); }
       }}
       onMouseUp={() => (press.current = null)}>
-      <div className="h-full flex flex-col overflow-hidden relative" style={{
-        background: bg, color: fg, borderRadius: 22,
-        ...(note.bg_image ? { backgroundImage: `url("${note.bg_image}")`, backgroundSize: "cover", backgroundPosition: "center" } : {}),
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,.6), 0 3px 0 rgba(43,33,64,.10)",
+      <div className="h-full flex flex-col overflow-hidden relative isolate" style={{
+        background: note.bg_image ? "transparent" : bg, color: fg, borderRadius: 22, // con imagen de fondo, el PNG transparente deja ver el escritorio
+        boxShadow: note.bg_image ? undefined : "inset 0 1px 0 rgba(255,255,255,.6), 0 3px 0 rgba(43,33,64,.10)",
       }}>
+        {note.bg_image && (
+          <div className="absolute inset-0 -z-10 pointer-events-none" style={{
+            backgroundImage: `url("${note.bg_image}")`, backgroundSize: "cover", backgroundPosition: "center", opacity: note.opacity / 100,
+          }} />
+        )}
         {/* barra superior: botones y orden configurables; sin botones = nota sin barra */}
         {toolbar.length > 0 ? (
           <div className="flex items-center justify-between shrink-0 h-10 pl-4 pr-2.5" style={{ background: "rgba(43,33,64,.09)" }} {...drag}>
@@ -253,10 +271,6 @@ export function Note({ id }: { id: number }) {
                   style={{ fontSize: fs, textDecoration: b.t === "check" && b.done ? "line-through" : undefined, opacity: b.t === "check" && b.done ? 0.7 : 1 }}
                   onFocus={() => (focus.current = i)}
                   onChange={(e) => setBlock(i, { v: e.target.value })}
-                  onPaste={(e) => {
-                    const f = [...e.clipboardData.items].find((it) => it.type.startsWith("image/"))?.getAsFile();
-                    if (f) { e.preventDefault(); addImage(f); }
-                  }}
                   onKeyDown={(e) => {
                     const el = e.currentTarget, atStart = el.selectionStart === 0 && el.selectionEnd === 0;
                     if (e.key === "Enter" && !e.shiftKey && b.t !== "text") {
@@ -277,7 +291,7 @@ export function Note({ id }: { id: number }) {
         {/* barra inferior: solo en modo edición */}
         {editing && (
           <div className="shrink-0">
-            <div className="flex items-center gap-2 px-3.5 pt-1.5 pb-4">
+            <div className="flex flex-wrap items-center gap-2 px-3.5 pt-1.5 pb-3">
               <Btn size={36} label="Color de la nota" on={panel === "color"} onClick={() => togglePanel("color")}><Icon d={P.palette} size={18} /></Btn>
               <Btn size={36} label="Tamaño de letra" on={panel === "size"} onClick={() => togglePanel("size")}><span className="text-[15px]">Aa</span></Btn>
               <Btn size={36} label="Fondo de la nota" on={panel === "bg" || !!note.bg_image} onClick={() => togglePanel("bg")}><Icon d={P.fill} size={18} /></Btn>
