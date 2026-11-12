@@ -1,6 +1,6 @@
 [package]
 name = "stickedd"
-version = "0.4.1"
+version = "0.5.0"
 description = "Notas adhesivas flotantes para el escritorio de Windows"
 authors = ["Edgar Lopez Calomarde"]
 edition = "2024"

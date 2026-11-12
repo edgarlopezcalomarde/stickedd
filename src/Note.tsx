@@ -3,7 +3,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { listen } from "@tauri-apps/api/event";
 import { deleteNote, getNote, getToolbar, updateNote, type Note as NoteT, type ToolId } from "./db";
 import { ink, inkOn, shade } from "./theme";
-import { parseBlocks, type Block, type ImgBlock } from "./blocks";
+import { isText, parseBlocks, type Block, type ImgBlock, type TableBlock } from "./blocks";
 import { pickImage, readImage } from "./image";
 import { Icon, P } from "./icons";
 import { closePanel, openPanel } from "./windows";
@@ -25,6 +25,44 @@ function Btn({ label, on, size = 28, onClick, children }: { label: string; on?: 
       style={{ width: size, height: size, background: on ? ink() : "rgba(255,255,255,0.55)", color: on ? "#fff" : ink() }}>
       {children}
     </button>
+  );
+}
+
+const cellH = (el: HTMLTextAreaElement | null) => { if (el) { el.style.height = "0"; el.style.height = el.scrollHeight + "px"; } };
+
+function TableEditor({ b, editing, fs, onFocus, onChange, onRemove }: {
+  b: TableBlock; editing: boolean; fs: number; onFocus: () => void; onChange: (rows: string[][]) => void; onRemove: () => void;
+}) {
+  const cols = b.rows[0]?.length ?? 1;
+  const pill = "h-7 px-3 rounded-full border-0 cursor-pointer text-[13px] font-bold";
+  const style = { background: "rgba(255,255,255,0.55)", color: ink() };
+  return (
+    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+      <table className="w-full border-collapse table-fixed" style={{ fontSize: fs }}>
+        <tbody>
+          {b.rows.map((row, y) => (
+            <tr key={y}>
+              {row.map((c, x) => (
+                <td key={x} className="p-0 align-top" style={{ border: "1.5px solid color-mix(in srgb, currentColor 35%, transparent)" }}>
+                  <textarea ref={cellH} value={c} rows={1} readOnly={!editing} onFocus={onFocus}
+                    className={`block w-full bg-transparent leading-[1.4] overflow-hidden px-1.5 py-1 ${editing ? "" : "cursor-default"}`}
+                    onChange={(e) => onChange(b.rows.map((r, j) => (j === y ? r.map((v, k) => (k === x ? e.target.value : v)) : r)))} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {editing && (
+        <div className="flex flex-wrap gap-1.5">
+          <button className={pill} style={style} onClick={() => onChange([...b.rows, Array(cols).fill("")])}>+ Fila</button>
+          <button className={pill} style={style} onClick={() => onChange(b.rows.map((r) => [...r, ""]))}>+ Columna</button>
+          {b.rows.length > 1 && <button className={pill} style={style} onClick={() => onChange(b.rows.slice(0, -1))}>− Fila</button>}
+          {cols > 1 && <button className={pill} style={style} onClick={() => onChange(b.rows.map((r) => r.slice(0, -1)))}>− Columna</button>}
+          <button className={pill} style={style} onClick={onRemove}>Quitar tabla</button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -96,8 +134,8 @@ export function Note({ id }: { id: number }) {
   const insertAfter = (i: number, b: Block) => {
     const next = [...blocks]; next.splice(i + 1, 0, b); pending.current = i + 1; commit(next);
   };
-  const insertImage = (i: number, src: string) => { // tras la imagen siempre queda una línea donde seguir escribiendo
-    const next = [...blocks]; const add: Block[] = [{ t: "img", v: src, w: 100 }];
+  const insertMedia = (i: number, m: Block) => { // tras una imagen/tabla siempre queda una línea donde seguir escribiendo
+    const next = [...blocks]; const add: Block[] = [m];
     if (i >= blocks.length - 1) add.push({ t: "text", v: "" });
     next.splice(i + 1, 0, ...add); commit(next);
   };
@@ -106,16 +144,18 @@ export function Note({ id }: { id: number }) {
     pending.current = Math.max(0, i - 1);
     commit(next.length ? next : [{ t: "text", v: "" }]);
   };
+  const insertImage = (i: number, src: string) => insertMedia(i, { t: "img", v: src, w: 100 });
+  const setRows = (i: number, rows: string[][]) => setBlock(i, { rows });
   const convert = (t: "bullet" | "check") => { // alterna el tipo del bloque enfocado, o añade uno nuevo
     const i = focus.current;
-    if (i != null && blocks[i] && blocks[i].t !== "img") {
+    if (i != null && blocks[i] && isText(blocks[i])) {
       const cur = blocks[i];
       setBlock(i, { t: cur.t === t ? "text" : t, done: false } as Partial<Block>);
       pending.current = i;
     } else insertAfter(blocks.length - 1, { t, v: "", done: false });
   };
   const hop = (from: number, dir: -1 | 1) => { // salta al texto anterior/siguiente (ignora imágenes)
-    for (let k = from + dir; k >= 0 && k < blocks.length; k += dir) if (blocks[k].t !== "img") { refs.current[k]?.focus(); return true; }
+    for (let k = from + dir; k >= 0 && k < blocks.length; k += dir) if (isText(blocks[k])) { refs.current[k]?.focus(); return true; }
     return false;
   };
   const addImage = async (blob: Blob) => insertImage(focus.current ?? blocks.length - 1, await readImage(blob));
@@ -184,7 +224,7 @@ export function Note({ id }: { id: number }) {
   const fs = note.font_size;
   // Sin botones visibles y fuera de edición: el contenido gana todo el espacio; si solo hay una imagen, la llena entera
   const bare = toolbar.length === 0 && !editing;
-  const fill = bare && blocks.filter((b) => b.t === "img").length === 1 && blocks.every((b) => b.t === "img" || !b.v.trim());
+  const fill = bare && blocks.filter((b) => b.t === "img").length === 1 && blocks.every((b) => b.t === "img" || (isText(b) && !b.v.trim()));
   const canGrab = !editing && !note.locked; // en modo visión y sin fijar se mueve agarrando cualquier parte
 
   return (
@@ -263,9 +303,12 @@ export function Note({ id }: { id: number }) {
                     </>
                   )}
                 </div>
+              ) : b.t === "table" ? (
+                <TableEditor b={b} editing={editing} fs={fs} onFocus={() => (focus.current = i)}
+                  onChange={(rows) => setRows(i, rows)} onRemove={() => remove(i)} />
               ) : (
                 <textarea ref={(el) => { refs.current[i] = el; if (el) { el.style.height = "0"; el.style.height = el.scrollHeight + "px"; } }}
-                  value={b.v} rows={1} readOnly={!editing} placeholder={editing && i === 0 ? "Escribe aquí…" : ""}
+                  value={b.v} rows={1} readOnly={!editing} placeholder={editing && blocks.length === 1 ? "Escribe aquí…" : ""}
                   className={`flex-1 bg-transparent w-full leading-[1.4] overflow-hidden ${editing ? "" : "cursor-default"}`}
                   style={{ fontSize: fs, textDecoration: b.t === "check" && b.done ? "line-through" : undefined, opacity: b.t === "check" && b.done ? 0.7 : 1 }}
                   onFocus={() => (focus.current = i)}
@@ -296,6 +339,7 @@ export function Note({ id }: { id: number }) {
               <Btn size={36} label="Fondo de la nota" on={panel === "bg" || !!note.bg_image} onClick={() => togglePanel("bg")}><Icon d={P.fill} size={18} /></Btn>
               <Btn size={36} label="Lista con viñetas" on={focus.current != null && blocks[focus.current]?.t === "bullet"} onClick={() => convert("bullet")}><Icon d={P.bullet} size={18} /></Btn>
               <Btn size={36} label="Lista de tareas con checkbox" on={focus.current != null && blocks[focus.current]?.t === "check"} onClick={() => convert("check")}><Icon d={P.check} size={18} /></Btn>
+              <Btn size={36} label="Insertar tabla" onClick={() => insertMedia(focus.current ?? blocks.length - 1, { t: "table", rows: [["", ""], ["", ""]] })}><Icon d={P.table} size={18} /></Btn>
               <Btn size={36} label="Insertar imagen (o pega con Ctrl+V)" onClick={async () => { const f = await pickImage(); if (f) addImage(f); }}><Icon d={P.image} size={18} /></Btn>
             </div>
           </div>

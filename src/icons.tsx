@@ -9,6 +9,7 @@ export const P = {
   bullet: <><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" fill="currentColor" /><circle cx="4.5" cy="12" r="1" fill="currentColor" /><circle cx="4.5" cy="18" r="1" fill="currentColor" /></>,
   check: <><path d="M3.5 6.5l2 2 3.5-4" /><path d="M3.5 15.5l2 2 3.5-4" /><path d="M13 7h8M13 16h8" /></>,
   image: <><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.6" /><path d="M21 16l-5-5-8 9" /></>,
+  table: <><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M3 10h18M3 15h18M10 4v16" /></>,
   fill: <><path d="M5 11l6-6 7 7-6 6z" /><path d="M19 15s2 2.2 2 3.5a2 2 0 0 1-4 0c0-1.3 2-3.5 2-3.5z" /></>,
   plus: <path d="M12 5v14M5 12h14" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
